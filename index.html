@@ -1,0 +1,343 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Buscador de CEP</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="js/script.js" defer></script>
+</head>
+<body>
+
+    <header class="topbar">
+        <div class="topbar-content">
+            <a href="#" class="brand">
+                <i class='bx bxs-map-pin brand-icon'></i>
+                <span>Buscador de <strong>CEP</strong></span>
+            </a>
+
+            
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="hero" id="sobre">
+            <div class="hero-copy">
+                <h1>
+                    Digite o <span>CEP</span> e descubra
+                    <br class="desktop-break">
+                    as informações do endereço
+                </h1>
+
+                <p>
+                    Encontre rapidamente o endereço completo usando
+                    <br class="desktop-break">
+                    a API dos Correios.
+                </p>
+            </div>
+
+            <div class="hero-art" aria-hidden="true">
+                <div class="art-orbit"></div>
+                <i class='bx bxs-map-pin art-pin'></i>
+
+                <div class="map-shape">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+                <div class="address-chip">
+                    <i class='bx bxs-home'></i>
+                    <div><b></b><b></b></div>
+                </div>
+
+                <i class='bx bxs-circle dot dot-one'></i>
+                <i class='bx bxs-circle dot dot-two'></i>
+            </div>
+        </section>
+
+        <form class="search-panel" id="cep-form">
+            <label class="sr-only" for="cep">Digite o CEP</label>
+
+            <div class="input-wrap">
+                <i class='bx bxs-map-pin'></i>
+
+                <input
+                    type="text"
+                    id="cep"
+                    name="cep"
+                    placeholder="Digite o CEP (ex.: 01001-000)"
+                    maxlength="9"
+                    inputmode="numeric"
+                    autocomplete="postal-code"
+                >
+            </div>
+
+            <button type="submit" id="search-button">
+                <i class='bx bx-search'></i>
+                <span>Buscar</span>
+            </button>
+        </form>
+
+        <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+
+        <section class="result-panel">
+
+            <div class="result-intro">
+                <div class="status-icon" id="status-icon">
+                    <i class='bx bx-check'></i>
+                </div>
+
+                <h2 id="result-title">Busque um CEP</h2>
+
+                <p id="result-description">
+                    As informações do endereço aparecerão aqui após a pesquisa.
+                </p>
+            </div>
+
+            <div class="details-card">
+
+                <div class="detail-row">
+                    <i class='bx bx-detail detail-icon'></i>
+                    <span class="detail-label">CEP</span>
+                    <strong id="result-cep">—</strong>
+
+                    <button class="copy-button" type="button"
+                        data-copy="result-cep" aria-label="Copiar CEP">
+                        <i class='bx bx-copy'></i>
+                    </button>
+                </div>
+
+                <div class="detail-row">
+                    <i class='bx bxs-map detail-icon'></i>
+                    <span class="detail-label">Logradouro</span>
+                    <strong id="result-street">—</strong>
+                </div>
+
+                <div class="detail-row">
+                    <i class='bx bxs-buildings detail-icon'></i>
+                    <span class="detail-label">Bairro</span>
+                    <strong id="result-neighborhood">—</strong>
+                </div>
+
+                <div class="detail-row">
+                    <i class='bx bxs-buildings detail-icon'></i>
+                    <span class="detail-label">Cidade</span>
+                    <strong id="result-city">—</strong>
+                </div>
+
+                <div class="detail-row">
+                    <i class='bx bxs-shield-plus detail-icon'></i>
+                    <span class="detail-label">Estado</span>
+                    <strong id="result-state">—</strong>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+
+            <a href="#" class="brand footer-brand">
+                <i class='bx bxs-map-pin brand-icon'></i>
+                <span>Buscador de <strong>CEP</strong></span>
+            </a>
+
+            <p>
+                Dados fornecidos pela
+                <a href="https://viacep.com.br/" target="_blank" rel="noopener noreferrer">API ViaCEP</a>.
+            </p>
+
+            <p class="made-with">
+                <i class='bx bx-code-alt'></i>
+                Projeto desenvolvido com
+                <i class='bx bxs-heart heart'></i>
+                por você!
+            </p>
+
+        </div>
+    </footer>
+
+    <script>
+        
+const form = document.querySelector('#cep-form');
+const cepInput = document.querySelector('#cep');
+const searchButton = document.querySelector('#search-button');
+const feedback = document.querySelector('#feedback');
+
+const fields = {
+    cep: document.querySelector('#result-cep'),
+    street: document.querySelector('#result-street'),
+    neighborhood: document.querySelector('#result-neighborhood'),
+    city: document.querySelector('#result-city'),
+    state: document.querySelector('#result-state')
+};
+
+const resultTitle = document.querySelector('#result-title');
+const resultDescription = document.querySelector('#result-description');
+const statusIcon = document.querySelector('#status-icon');
+
+function onlyNumbers(value) {
+    return value.replace(/\D/g, '').slice(0, 8);
+}
+
+function formatCep(value) {
+    const numbers = onlyNumbers(value);
+
+    return numbers.length > 5
+        ? `${numbers.slice(0, 5)}-${numbers.slice(5)}`
+        : numbers;
+}
+
+cepInput.addEventListener('input', () => {
+    cepInput.value = formatCep(cepInput.value);
+});
+
+function showFeedback(message, type = '') {
+    feedback.textContent = message;
+    feedback.className = `feedback ${type}`.trim();
+}
+
+function setResultState(type, title, description) {
+    resultTitle.textContent = title;
+    resultDescription.textContent = description;
+
+    if (type === 'error') {
+        statusIcon.innerHTML = "<i class='bx bx-error-circle'></i>";
+        statusIcon.style.background = 'linear-gradient(135deg, #ff6878, #bd2948)';
+    } else if (type === 'loading') {
+        statusIcon.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i>";
+        statusIcon.style.background = 'linear-gradient(135deg, #607a9d, #344861)';
+    } else {
+        statusIcon.innerHTML = "<i class='bx bx-check'></i>";
+        statusIcon.style.background = 'linear-gradient(135deg, #168fff, #2451ff)';
+    }
+}
+
+function clearResults() {
+    Object.values(fields).forEach(field => {
+        field.textContent = '—';
+    });
+}
+
+async function searchCep(event) {
+    event.preventDefault();
+
+    const cep = onlyNumbers(cepInput.value);
+
+    if (cep.length !== 8) {
+        showFeedback('Digite um CEP válido com 8 números.', 'error');
+        cepInput.focus();
+        return;
+    }
+
+    searchButton.disabled = true;
+    searchButton.querySelector('span').textContent = 'Buscando...';
+
+    showFeedback('Consultando o endereço...');
+    setResultState(
+        'loading',
+        'Buscando endereço...',
+        'Aguarde enquanto consultamos o CEP informado.'
+    );
+    clearResults();
+
+    try {
+        const response = await fetch(
+            `https://viacep.com.br/ws/${cep}/json/`
+        );
+
+        if (!response.ok) {
+            throw new Error('Erro na consulta.');
+        }
+
+        const data = await response.json();
+
+        if (data.erro) {
+            setResultState(
+                'error',
+                'CEP não encontrado',
+                'Confira os números digitados e tente novamente.'
+            );
+
+            showFeedback(
+                'Nenhum endereço foi encontrado para esse CEP.',
+                'error'
+            );
+
+            return;
+        }
+
+        fields.cep.textContent = data.cep || formatCep(cep);
+        fields.street.textContent = data.logradouro || 'Não informado';
+        fields.neighborhood.textContent = data.bairro || 'Não informado';
+        fields.city.textContent = data.localidade || 'Não informado';
+        fields.state.textContent = data.uf || 'Não informado';
+
+        setResultState(
+            'success',
+            'Endereço encontrado!',
+            'Confira abaixo as informações do CEP pesquisado.'
+        );
+
+        showFeedback('CEP consultado com sucesso.', 'success');
+
+    } catch (error) {
+        setResultState(
+            'error',
+            'Não foi possível consultar',
+            'Verifique sua conexão com a internet e tente novamente.'
+        );
+
+        showFeedback(
+            'Ocorreu um erro ao consultar o CEP. Tente novamente.',
+            'error'
+        );
+
+    } finally {
+        searchButton.disabled = false;
+        searchButton.querySelector('span').textContent = 'Buscar';
+    }
+}
+
+form.addEventListener('submit', searchCep);
+
+document.querySelectorAll('[data-copy]').forEach(button => {
+    button.addEventListener('click', async () => {
+        const target = document.getElementById(button.dataset.copy);
+        const value = target.textContent.trim();
+
+        if (!value || value === '—' || value === 'Não informado') {
+            showFeedback('Faça uma busca antes de copiar o CEP.', 'error');
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(value);
+            showFeedback(
+                'CEP copiado para a área de transferência.',
+                'success'
+            );
+        } catch {
+            showFeedback(
+                'Não foi possível copiar automaticamente.',
+                'error'
+            );
+        }
+    });
+});
+
+    </script>
+
+</body>
+</html>
